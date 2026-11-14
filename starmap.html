@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="星座星空圖：依日期、時間與地點算出當晚的星空，標示黃道十二星座、行星、月亮與銀河。">
+<title>星座星空圖 — 星宇・探索</title>
+<link rel="icon" type="image/png" href="images/planeticon.png">
+<link rel="stylesheet" href="SEstyle.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cosmos/cosmos.css">
+<meta name="theme-color" content="#060818">
+<style>
+html,body{overflow:hidden}
+.wrapper{min-height:0!important;height:100vh;height:100svh}
+.stage{position:relative;height:calc(100svh - 72px);overflow:hidden}
+#sky{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+.sm-panel{position:absolute!important;border-radius:20px!important;padding:16px 18px;z-index:20;overflow:auto!important}
+.sm-left{left:16px;top:16px;width:282px;max-height:calc(100% - 32px)}
+.sm-right{right:16px;top:16px;width:290px;max-height:calc(100% - 32px)}
+.sm-panel h1{font-family:var(--font-display);font-size:1.2rem;margin:0 0 2px;letter-spacing:.06em;border:0!important;padding:0!important}
+.sm-panel .sub{color:var(--muted);font-size:.78rem;margin:0 0 10px}
+.grp{margin-top:12px}.grp>label{display:block;color:var(--dim);font-size:.68rem;letter-spacing:.2em;margin-bottom:6px}
+.inp{width:100%;margin-bottom:6px;font:inherit;font-size:.84rem;color:#fff;background:rgba(139,124,246,.12);border:1px solid var(--line);border-radius:12px;padding:7px 10px;color-scheme:dark}
+select.inp option{background:#10143a}
+input[type=range]{width:100%;accent-color:#8b7cf6}
+.timeread{font-family:var(--font-display);font-size:1.5rem;letter-spacing:.06em;color:#fff}.timeread small{display:block;font-size:.72rem;color:var(--muted);letter-spacing:.04em;font-family:var(--font)}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.sb{font:inherit;font-size:.78rem;color:var(--muted);background:rgba(139,124,246,.08);border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer;transition:.25s var(--ease)}
+.sb:hover{color:#fff;border-color:var(--line-strong)}.sb.on{color:#fff;background:linear-gradient(135deg,rgba(139,124,246,.5),rgba(94,234,212,.28));border-color:var(--line-strong)}
+.tonight h2{margin:0 0 10px;font-size:1.05rem;font-family:var(--font-display);border:0!important;padding:0!important;letter-spacing:.06em}
+.obj{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.84rem}
+.obj:last-child{border:0}.obj i{font-style:normal;font-size:1.1rem;text-align:center}.obj small{color:var(--dim);display:block;font-size:.72rem}
+.obj .st{font-size:.72rem;padding:2px 9px;border-radius:99px;border:1px solid var(--line)}.obj .st.ok{color:var(--teal);border-color:rgba(94,234,212,.5)}.obj .st.no{color:var(--dim)}
+.sunbox{margin-top:12px;padding:12px 14px;border-radius:14px;background:rgba(253,231,165,.07);border:1px solid rgba(253,231,165,.25);font-size:.8rem;line-height:1.75;color:#f0e6c8}
+.sunbox b{color:#ffe08a}.sunbox a{color:var(--teal)}
+#smtip{position:absolute;z-index:30;pointer-events:none;padding:5px 12px;border-radius:10px;background:rgba(8,12,36,.88);border:1px solid var(--line-strong);font-size:.8rem;opacity:0;transform:translate(12px,-34px);white-space:nowrap}
+#sky{cursor:grab}#sky.drag{cursor:grabbing}
+.sel-card{position:absolute!important;left:50%;top:14px;transform:translateX(-50%);width:min(380px,calc(100% - 640px));min-width:300px;z-index:25;border-radius:18px!important;padding:14px 18px;overflow:visible!important}
+.sel-card[hidden]{display:none}
+.sel-card h3{margin:0 0 2px;font-family:var(--font-display);font-size:1.15rem;border:0!important;padding:0!important;letter-spacing:.05em}
+.sel-card .tp{color:var(--teal);font-size:.72rem;letter-spacing:.16em}
+.sel-card .kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin:8px 0 6px;font-size:.8rem;color:var(--muted)}.sel-card .kv b{color:#fff;font-weight:500}
+.sel-card p{margin:6px 0 0;color:#d3dbff;font-size:.86rem;line-height:1.7}
+.sel-x{position:absolute;right:10px;top:8px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer}
+.sh-row{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.82rem;cursor:pointer}
+.sh-row:last-child{border:0}.sh-row small{color:var(--dim);grid-column:1/-1}.sh-row b{font-weight:500}.sh-row .bd{font-size:.68rem;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}.sh-row .bd.on{color:var(--teal);border-color:rgba(94,234,212,.5)}
+.sh-row:hover b{color:var(--gold)}
+.sec-h{color:var(--dim);font-size:.68rem;letter-spacing:.2em;margin:14px 0 4px}
+@media(max-width:860px){.sel-card{width:calc(100% - 20px);min-width:0;top:8px}}
+@media(max-width:860px){.sm-right{display:none}.sm-left{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:44%}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<header class="top-nav">
+  <a href="index.html" class="logo-link"></a>
+  <nav class="menu">
+    <a href="index.html" class="menu-item">主頁</a><a href="SEplanets.html" class="menu-item">星球</a>
+    <a href="SEother.html" class="menu-item active">星座</a><a href="SEfortune.html" class="menu-item">神社</a><a href="SEabout.html" class="menu-item">關於</a>
+  </nav>
+</header>
+<div class="stage" id="stage">
+  <canvas id="sky" aria-label="星座星空圖"></canvas>
+  <div id="smtip"></div>
+  <div class="sel-card glass" id="sel" hidden></div>
+  <aside class="sm-panel glass sm-left">
+    <h1>星座星空圖</h1><p class="sub">依日期、時間與地點計算（教學示意，精度約 1°）</p>
+    <div class="timeread" id="timeRead">—<small id="dateRead"></small></div>
+    <div class="grp"><label>地點</label>
+      <select class="inp" id="place"></select><button class="sb" id="geo">📍 使用我的位置</button></div>
+    <div class="grp"><label>日期與時間</label>
+      <input type="date" class="inp" id="dateIn"><input type="range" id="timeIn" min="0" max="1439" step="5">
+      <div class="row" style="margin-top:6px"><button class="sb" id="bNow">現在</button><button class="sb" id="b21">今晚 21:00</button><button class="sb" id="bPlay">▶ 時間流動</button></div></div>
+    <div class="grp"><label>視角（拖曳旋轉・滾輪縮放）</label><div class="row" id="views"></div></div>
+    <div class="grp"><label>我的星座（高亮）</label><select class="inp" id="mySign"></select></div>
+    <div class="grp"><label>顯示</label><div class="row" id="tgs"></div></div>
+  </aside>
+  <aside class="sm-panel glass sm-right tonight">
+    <h2>此刻天空的主角</h2><div id="objs"></div><div class="sec-h">流星雨</div><div id="showers"></div>
+    <div class="sunbox" id="sunBox"></div>
+  </aside>
+</div>
+</div>
+<script src="cosmos/cosmos.js"></script>
+<script src="cosmos/astro.js"></script>
+<script src="cosmos/starmap-data.js"></script>
+<script>
+(function(){
+'use strict';
+var SM=STARMAP,cv=document.getElementById('sky'),ctx=cv.getContext('2d'),stage=document.getElementById('stage'),FONT=getComputedStyle(document.body).fontFamily,PI=Math.PI,D2R=PI/180;
+var W,H,dpr,cx,cy,R,mob;
+var S={place:1,date:'',min:0,play:false,sign:'',tg:{lines:1,names:1,ecl:1,mw:1,grid:1,show:1},hits:[]};
+var V={az:180,alt:90,half:90,taz:180,talt:90,thalf:90};
+var ZH={aries:'白羊座',taurus:'金牛座',gemini:'雙子座',cancer:'巨蟹座',leo:'獅子座',virgo:'處女座',libra:'天秤座',scorpio:'天蠍座',sagittarius:'射手座',capricorn:'摩羯座',aquarius:'水瓶座',pisces:'雙魚座',ophiuchus:'蛇夫座'};
+var ZODIAC=['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
+var placeSel=document.getElementById('place');SM.PLACES.forEach(function(p,i){var o=document.createElement('option');o.value=i;o.textContent=p[0];placeSel.appendChild(o);});placeSel.value=S.place;
+var mySel=document.getElementById('mySign');mySel.innerHTML='<option value="">（不指定）</option>'+ZODIAC.map(function(z){return '<option value="'+z+'">'+ZH[z]+'</option>';}).join('');
+var TG=[['lines','星座連線'],['names','名稱'],['ecl','黃道'],['mw','銀河'],['grid','高度圈'],['show','流星雨']];
+var tgs=document.getElementById('tgs');TG.forEach(function(t){var b=document.createElement('button');b.className='sb on';b.textContent=t[1];b.onclick=function(){S.tg[t[0]]=!S.tg[t[0]];b.classList.toggle('on',S.tg[t[0]]);};tgs.appendChild(b);});
+[['頭頂',180,90],['北',0,32],['東',90,32],['南',180,32],['西',270,32]].forEach(function(v){var b=document.createElement('button');b.className='sb';b.textContent=v[0];b.onclick=function(){V.taz=v[1];V.talt=v[2];V.thalf=v[0]==='頭頂'?90:70;};document.getElementById('views').appendChild(b);});
+function pad(n){return String(n).padStart(2,'0');}
+function nowAt(tz){var d=new Date(Date.now()+tz*3600e3);return {date:d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate()),min:d.getUTCHours()*60+d.getUTCMinutes()};}
+function setNow(){var n=nowAt(SM.PLACES[S.place][3]);S.date=n.date;S.min=n.min;sync();}
+function sync(){document.getElementById('dateIn').value=S.date;document.getElementById('timeIn').value=Math.floor(S.min);}
+document.getElementById('dateIn').onchange=function(){if(this.value)S.date=this.value;};
+document.getElementById('timeIn').oninput=function(){S.min=+this.value;S.play=false;document.getElementById('bPlay').textContent='▶ 時間流動';};
+placeSel.onchange=function(){S.place=+this.value;};mySel.onchange=function(){S.sign=this.value;};
+document.getElementById('bNow').onclick=setNow;document.getElementById('b21').onclick=function(){S.min=21*60;sync();};
+document.getElementById('bPlay').onclick=function(){S.play=!S.play;this.textContent=S.play?'⏸ 暫停':'▶ 時間流動';};
+document.getElementById('geo').onclick=function(){var b=this;if(!navigator.geolocation){b.textContent='此瀏覽器不支援定位';return;}b.textContent='定位中…';navigator.geolocation.getCurrentPosition(function(p){var tz=Math.round(-new Date().getTimezoneOffset()/60);SM.PLACES.push(['我的位置',p.coords.latitude,p.coords.longitude,tz]);var o=document.createElement('option');o.value=SM.PLACES.length-1;o.textContent='我的位置';placeSel.appendChild(o);placeSel.value=o.value;S.place=+o.value;b.textContent='📍 已定位';setNow();},function(){b.textContent='無法取得位置';});};
+var q=new URLSearchParams(location.search).get('sign');if(q&&ZH[q]){S.sign=q;mySel.value=q;}
+setNow();
+function utc(){var p=S.date.split('-'),pl=SM.PLACES[S.place];return Date.UTC(+p[0],+p[1]-1,+p[2],0,0)+S.min*60000-pl[3]*3600e3;}
+function altaz(ra,dec,d){var pl=SM.PLACES[S.place];return ASTRO.horiz(ra,dec,pl[1],pl[2],d);}
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);mob=W<860;cx=W/2;cy=mob?H*.34:H/2;R=Math.min(W*.47,mob?H*.3:H*.46);}
+addEventListener('resize',resize);resize();
+/* ---------- 視角投影：以觀看方向為中心的等距方位投影 ---------- */
+var BS=null;
+function basis(){var a=V.alt*D2R,z=V.az*D2R,f=[Math.cos(a)*Math.sin(z),Math.cos(a)*Math.cos(z),Math.sin(a)],u=[-Math.sin(a)*Math.sin(z),-Math.sin(a)*Math.cos(z),Math.cos(a)];
+  BS={f:f,u:u,r:[f[1]*u[2]-f[2]*u[1],f[2]*u[0]-f[0]*u[2],f[0]*u[1]-f[1]*u[0]]};}
+function proj(h){var ca=Math.cos(h.alt),v0=ca*Math.sin(h.az),v1=ca*Math.cos(h.az),v2=Math.sin(h.alt),B=BS;
+  var xc=v0*B.r[0]+v1*B.r[1]+v2*B.r[2],yc=v0*B.u[0]+v1*B.u[1]+v2*B.u[2],zc=v0*B.f[0]+v1*B.f[1]+v2*B.f[2],d=Math.acos(Math.max(-1,Math.min(1,zc))),half=V.half*D2R,k=d<1e-6?1:d/Math.sin(d),sc=R/half;
+  return {x:cx+xc*k*sc,y:cy-yc*k*sc,alt:h.alt,ok:d<=half*1.02};}
+function mix(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+function col(c,a){return 'rgba('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+','+(a==null?1:a)+')';}
+var DIRS=['北','東北','東','東南','南','西南','西','西北'];
+function dirName(az){return DIRS[Math.round(az/(PI/4))%8];}
+function curve(fn,n,close){var st=false,pp=null;ctx.beginPath();for(var i=0;i<=n;i++){var h=fn(i/n),o=proj(h);if(!o.ok){st=false;pp=null;continue;}if(!st||(pp&&Math.hypot(o.x-pp.x,o.y-pp.y)>R*.8)){ctx.moveTo(o.x,o.y);st=true;}else ctx.lineTo(o.x,o.y);pp=o;}ctx.stroke();}
+function conOf(lonDeg){var sl=((lonDeg%360)+360)%360,r=null;SM.SUNCON.forEach(function(x){if(x[0]<x[1]?(sl>=x[0]&&sl<x[1]):(sl>=x[0]||sl<x[1]))r=x[2];});return r;}
+/* ---------- 選取資訊卡 ---------- */
+var sel=document.getElementById('sel');
+function showInfo(o){var h='<button class="sel-x" aria-label="關閉">✕</button><div class="tp">'+o.type+'</div><h3>'+o.title+'</h3>';
+  if(o.kv&&o.kv.length){h+='<div class="kv">'+o.kv.map(function(k){return '<span>'+k[0]+'：<b>'+k[1]+'</b></span>';}).join('')+'</div>';}
+  if(o.note)h+='<p>'+o.note+'</p>';if(o.go)h+='<p><a style="color:var(--teal)" href="'+o.go+'">看運勢 →</a></p>';
+  sel.innerHTML=h;sel.hidden=false;sel.querySelector('.sel-x').onclick=function(){sel.hidden=true;};}
+/* ---------- 流星雨 ---------- */
+function dayDiff(s,y,mo,da){var cur=Date.UTC(y,mo-1,da),best=1e9,pk=0;[-1,0,1].forEach(function(o){var p=Date.UTC(y+o,s.m-1,s.d),df=(cur-p)/864e5;if(Math.abs(df)<Math.abs(best)){best=df;pk=p;}});return best;}
+function moonAt(ms){var d=ASTRO.days(ms),sn=ASTRO.sun(d),mo=ASTRO.moon(d),el=((mo.lon-sn.lon)/D2R%360+360)%360;return Math.round((1-Math.cos(el*D2R))/2*100);}
+function peakMs(s,y,mo,da){var df=dayDiff(s,y,mo,da),cur=Date.UTC(y,mo-1,da);return cur-df*864e5;}
+var showerHTML='';
+function showerPanel(y,mo,da){var rows=SM.SHOWERS.map(function(s){var df=dayDiff(s,y,mo,da),up=-df;if(df>s.hw){var nx=dayDiff(s,y,mo,da);up=(365-df);}return {s:s,df:df,act:Math.abs(df)<=s.hw,wait:df<=0?-df:365-df};});
+  rows.sort(function(a,b){return (b.act-a.act)||(a.wait-b.wait);});
+  var h='';rows.slice(0,5).forEach(function(r){var s=r.s,ml=moonAt(peakMs(s,y,mo,da)+12*3600e3);
+    h+='<div class="sh-row" data-id="'+s.id+'"><b>'+s.n+'</b><span class="bd '+(r.act?'on':'')+'">'+(r.act?'活躍中':(Math.round(r.wait)+' 天後'))+'</span><small>峰值 '+s.m+'/'+s.d+'・每小時約 '+s.zhr+' 顆・峰值月亮亮面 '+ml+'%</small></div>';});
+  return h;}
+function showerInfo(s,y,mo,da){var ml=moonAt(peakMs(s,y,mo,da)+12*3600e3);showInfo({type:'流星雨輻射點',title:s.n,kv:[['峰值',s.m+'/'+s.d],['理想 ZHR','約 '+s.zhr+' 顆/時'],['母體',s.parent],['峰值月光','亮面 '+ml+'%']],note:s.note+' 流星看起來都從輻射點附近往外飛，但在天空任何方向都可能看到。ZHR 是「完美黑暗天空、輻射點在天頂」時的理論數量，實際看到的通常更少。'});}
+document.getElementById('showers').addEventListener('click',function(e){var r=e.target.closest('.sh-row');if(!r)return;var s=SM.SHOWERS.filter(function(x){return x.id===r.dataset.id;})[0],p=S.date.split('-');showerInfo(s,+p[0],+p[1],+p[2]);
+  var h=altaz(s.ra,s.dec,ASTRO.days(utc()));if(h.alt>0){V.taz=h.az/D2R;V.talt=Math.max(25,Math.min(70,h.alt/D2R));V.thalf=70;}});
+/* ---------- 繪製 ---------- */
+var last=0,PINFO={mercury:'離太陽最近，只在日出前或日落後的低空短暫可見。',venus:'夜空中最亮的行星（啟明星／長庚星），厚雲層讓它特別亮。',mars:'紅色的行星，約每 26 個月最接近地球一次（稱為「衝」）。',jupiter:'最大的行星，用雙筒望遠鏡就能看到四顆伽利略衛星。',saturn:'擁有壯觀的行星環，小型望遠鏡就能看到。'};
+function frame(t){
+  var dt=Math.min(.05,(t-last)/1000||0);last=t;
+  if(S.play){S.min+=dt*40;if(S.min>=1440){S.min-=1440;var pp=S.date.split('-'),dd=new Date(Date.UTC(+pp[0],+pp[1]-1,+pp[2]+1));S.date=dd.getUTCFullYear()+'-'+pad(dd.getUTCMonth()+1)+'-'+pad(dd.getUTCDate());}sync();}
+  var kk=Math.min(1,dt*7),da=((V.taz-V.az+540)%360)-180;V.az=(V.az+da*kk+360)%360;V.alt+=(V.talt-V.alt)*kk;V.half+=(V.thalf-V.half)*kk;basis();
+  var ms=utc(),d=ASTRO.days(ms),dp=S.date.split('-'),Y=+dp[0],MO=+dp[1],DA=+dp[2];
+  var sun=ASTRO.sun(d),sEq=ASTRO.eclToEq(sun.lon,0,d),sH=altaz(sEq.ra,sEq.dec,d),sunAlt=sH.alt/D2R;
+  var dayK=Math.max(0,Math.min(1,(sunAlt+18)/18)),dk=Math.max(0,Math.min(1,sunAlt/8));
+  var top=mix(mix([3,5,20],[27,38,92],dayK),[70,130,210],dk),bot=mix(mix([8,12,36],[70,60,120],dayK),[150,190,235],dk),starA=Math.max(.04,Math.min(1,(-sunAlt-3)/15));
+  ctx.clearRect(0,0,W,H);S.hits=[];
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,PI*2);ctx.clip();
+  var g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,col(top));g.addColorStop(1,col(bot));ctx.fillStyle=g;ctx.fillRect(cx-R,cy-R,R*2,R*2);
+  if(S.tg.mw){ctx.globalCompositeOperation='lighter';SM.MW.forEach(function(p){var h=altaz(p.ra,p.dec,d);if(h.alt<0)return;var o=proj(h);if(!o.ok)return;ctx.fillStyle='rgba(190,200,255,'+(.11*p.w*starA)+')';ctx.beginPath();ctx.arc(o.x,o.y,2.6,0,PI*2);ctx.fill();});ctx.globalCompositeOperation='source-over';}
+  if(S.tg.grid){ctx.strokeStyle='rgba(165,178,255,.13)';ctx.lineWidth=1;[30,60].forEach(function(a){curve(function(t){return {alt:a*D2R,az:t*2*PI};},120);});[0,90,180,270].forEach(function(a){curve(function(t){return {alt:t*PI/2,az:a*D2R};},30);});}
+  if(S.tg.ecl){ctx.strokeStyle='rgba(253,231,165,.4)';ctx.setLineDash([5,6]);ctx.lineWidth=1.2;curve(function(t){var e=ASTRO.eclToEq(t*2*PI,0,d),h=altaz(e.ra,e.dec,d);if(h.alt<-.02)h={alt:-1,az:h.az};return h;},240);ctx.setLineDash([]);}
+  var sunCon=conOf(sun.lon/D2R);ctx.font='500 12px '+FONT;ctx.textAlign='center';
+  SM.CON.forEach(function(c){
+    var pts=c[2].map(function(s){var h=altaz(s.ra,s.dec,d);return {p:proj(h),alt:h.alt,az:h.az,s:s};}),isZ=ZODIAC.indexOf(c[0])>=0,hi=(c[0]===S.sign),sc=(c[0]===sunCon);
+    if(S.tg.lines){ctx.lineWidth=hi?2.2:1.1;ctx.strokeStyle=hi?'rgba(253,231,165,.95)':(isZ?'rgba(140,170,255,'+(.5*Math.max(.3,starA))+')':'rgba(140,170,255,'+(.25*Math.max(.3,starA))+')');
+      c[3].forEach(function(e){var A=pts[e[0]],B=pts[e[1]];if(A.alt<-.02||B.alt<-.02||!A.p.ok||!B.p.ok)return;ctx.beginPath();ctx.moveTo(A.p.x,A.p.y);ctx.lineTo(B.p.x,B.p.y);ctx.stroke();});}
+    pts.forEach(function(o){if(o.alt<0||!o.p.ok)return;var r=Math.max(.8,3.4-o.s.mag*.55),a=starA*(.55+.45*Math.min(1,(5-o.s.mag)/3));
+      ctx.fillStyle=hi?'rgba(253,231,165,'+a+')':'rgba(235,240,255,'+a+')';ctx.beginPath();ctx.arc(o.p.x,o.p.y,r*(hi?1.3:1),0,PI*2);ctx.fill();
+      if(r>2.2&&starA>.4){var gg=ctx.createRadialGradient(o.p.x,o.p.y,0,o.p.x,o.p.y,r*4);gg.addColorStop(0,'rgba(200,215,255,'+.35*starA+')');gg.addColorStop(1,'rgba(200,215,255,0)');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(o.p.x,o.p.y,r*4,0,PI*2);ctx.fill();}
+      if(o.s.zh){var inf=SM.INFO[o.s.zh]||[0,''];S.hits.push({x:o.p.x,y:o.p.y,r:12,n:o.s.zh,info:{type:'恆星・'+c[1],title:o.s.zh,kv:[['星等',o.s.mag.toFixed(1)],['距離',inf[0]?'約 '+inf[0].toLocaleString('en-US')+' 光年':'—'],['高度',(o.alt/D2R).toFixed(0)+'°'],['方位',dirName(o.az)+'方']],note:inf[1]||'屬於'+c[1]+'的亮星。'}});
+        if(S.tg.names&&starA>.4){ctx.fillStyle='rgba(205,215,255,.7)';ctx.textAlign='left';ctx.font='11px '+FONT;ctx.fillText(o.s.zh,o.p.x+6,o.p.y-5);ctx.textAlign='center';ctx.font='500 12px '+FONT;}}});
+    var vis=pts.filter(function(o){return o.alt>.05&&o.p.ok;});
+    if(S.tg.names&&vis.length&&starA>.25){var mx=0,my=0;vis.forEach(function(o){mx+=o.p.x;my+=o.p.y;});mx/=vis.length;my/=vis.length;
+      ctx.fillStyle=hi?'#ffe08a':(sc?'#ffd98a':(isZ?'rgba(190,205,255,.92)':'rgba(170,185,235,.6)'));ctx.font=(hi||sc?'700 ':'500 ')+'13px '+FONT;ctx.fillText(c[1]+(sc?' ☀':''),mx,my+16);if(isZ)S.hits.push({x:mx,y:my+12,r:30,go:'zodiac/zodiac_'+c[0]+'.html',n:c[1]+'（點擊看運勢）',info:null,pri:-1});}
+  });
+  SM.BRIGHT.forEach(function(s){var h=altaz(s.ra,s.dec,d);if(h.alt<0)return;var o=proj(h);if(!o.ok)return;var r=Math.max(1,3.6-s.mag*.5);ctx.fillStyle='rgba(235,240,255,'+starA+')';ctx.beginPath();ctx.arc(o.x,o.y,r,0,PI*2);ctx.fill();
+    var inf=SM.INFO[s.zh]||[0,''];S.hits.push({x:o.x,y:o.y,r:12,n:s.zh,info:{type:'亮星',title:s.zh,kv:[['星等',s.mag.toFixed(1)],['距離',inf[0]?'約 '+inf[0].toLocaleString('en-US')+' 光年':'—'],['高度',(h.alt/D2R).toFixed(0)+'°'],['方位',dirName(h.az)+'方']],note:inf[1]}});
+    if(S.tg.names&&starA>.4){ctx.fillStyle='rgba(205,215,255,.65)';ctx.textAlign='left';ctx.font='11px '+FONT;ctx.fillText(s.zh,o.x+6,o.y-5);ctx.textAlign='center';}});
+  // 流星雨輻射點
+  if(S.tg.show)SM.SHOWERS.forEach(function(s){var df=dayDiff(s,Y,MO,DA),act=Math.max(0,1-Math.abs(df)/Math.max(s.hw,3)),pk=Math.abs(df)<=s.hw;if(!pk&&Math.abs(df)>25)return;var h=altaz(s.ra,s.dec,d);if(h.alt<-.02)return;var o=proj(h);if(!o.ok)return;
+    var a=pk?(.55+.45*act):.22;ctx.save();ctx.translate(o.x,o.y);ctx.strokeStyle='rgba(255,220,150,'+a*Math.max(.3,starA)+')';ctx.lineWidth=1.3;for(var i=0;i<8;i++){var an=i*PI/4;ctx.beginPath();ctx.moveTo(Math.cos(an)*4,Math.sin(an)*4);ctx.lineTo(Math.cos(an)*(pk?13:8),Math.sin(an)*(pk?13:8));ctx.stroke();}ctx.restore();
+    if(pk&&starA>.3){ctx.fillStyle='rgba(255,226,170,.95)';ctx.textAlign='left';ctx.font='500 12px '+FONT;ctx.fillText('✦ '+s.n,o.x+16,o.y+4);ctx.textAlign='center';}
+    S.hits.push({x:o.x,y:o.y,r:16,n:s.n+(pk?'（活躍中）':'（輻射點）'),shower:s});});
+  ctx.restore();
+  // 太陽、月、行星
+  var objs=[],PCOL={mercury:['水星','#b3aca2'],venus:['金星','#fff0c2'],mars:['火星','#ff7a50'],jupiter:['木星','#f3dcb8'],saturn:['土星','#e8d19a']};
+  function put(name,ic,eq,color,r,extra,info){var h=altaz(eq.ra,eq.dec,d),o=proj(h);objs.push({n:name,ic:ic,h:h,extra:extra,color:color});if(h.alt<-.02||!o.ok)return;
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,PI*2);ctx.clip();var gg=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,r*5);gg.addColorStop(0,color);gg.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=.5;ctx.fillStyle=gg;ctx.beginPath();ctx.arc(o.x,o.y,r*5,0,PI*2);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle=color;ctx.beginPath();ctx.arc(o.x,o.y,r,0,PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='600 12px '+FONT;ctx.textAlign='left';ctx.fillText(name,o.x+r+5,o.y+4);ctx.restore();
+    if(info){info.kv=[['高度',(h.alt/D2R).toFixed(0)+'°'],['方位',dirName(h.az)+'方']].concat(info.kv||[]);S.hits.push({x:o.x,y:o.y,r:Math.max(14,r+6),n:name,info:info,pri:2});}}
+  put('太陽','☀',sEq,'#ffd36b',9,null,{type:'恆星（我們的太陽）',title:'太陽',kv:[['距離','約 1 AU（1.5 億公里）'],['所在方向',ZH[sunCon]||'']],note:'太陽在天上時，天空太亮，看不到星星；占星學的太陽星座和它實際所在的星座約差一個月。'});
+  var mo=ASTRO.moon(d),mEq=ASTRO.eclToEq(mo.lon,mo.lat,d),el=((mo.lon-sun.lon)/D2R%360+360)%360,illum=(1-Math.cos(el*D2R))/2,ph=['新月','眉月','上弦月','盈凸月','滿月','虧凸月','下弦月','殘月'][Math.round(el/45)%8];
+  put('月 '+ph,'☾',mEq,'#e8ecf5',6.5,Math.round(illum*100)+'% 亮面',{type:'月球',title:'月 · '+ph,kv:[['亮面',Math.round(illum*100)+'%'],['距離','約 '+Math.round(mo.dist/1000)*1000+' 公里']],note:'月亮約每 29.5 天完成一次盈虧。月光較亮時，暗的流星和星雲都比較不容易看到。'});
+  Object.keys(PCOL).forEach(function(id){var gz=ASTRO.geo(id,d),e=ASTRO.eclToEq(gz.lon,0,d);var cn=conOf(gz.lon/D2R);put(PCOL[id][0],'●',e,PCOL[id][1],id==='venus'||id==='jupiter'?3.8:3,null,{type:'行星',title:PCOL[id][0],kv:[['距離地球',gz.dist.toFixed(2)+' AU'],['光走過來',(gz.dist*8.317).toFixed(1)+' 分鐘'],['目前在',(ZH[cn]||'')+'方向']],note:PINFO[id]});objs[objs.length-1].pid=id;});
+  // 地平與方位
+  ctx.strokeStyle='rgba(180,195,255,.6)';ctx.lineWidth=1.6;curve(function(t){return {alt:0,az:t*2*PI};},180);
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,PI*2);ctx.clip();ctx.fillStyle='#fff';ctx.font='700 14px '+FONT;ctx.textAlign='center';
+  [['北',0],['東',90],['南',180],['西',270]].forEach(function(c){var o=proj({alt:3*D2R,az:c[1]*D2R});if(o.ok)ctx.fillText(c[0],o.x,o.y+5);});
+  var zo=proj({alt:PI/2-.0001,az:0});if(zo.ok){ctx.fillStyle='rgba(200,210,255,.55)';ctx.font='11px '+FONT;ctx.fillText('天頂',zo.x,zo.y-6);}ctx.restore();
+  ctx.strokeStyle='rgba(180,195,255,.25)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(cx,cy,R,0,PI*2);ctx.stroke();
+  var pl=SM.PLACES[S.place];
+  document.getElementById('timeRead').firstChild.nodeValue=pad(Math.floor(S.min/60))+':'+pad(Math.floor(S.min%60));
+  document.getElementById('dateRead').textContent=S.date.replace(/-/g,'.')+' · '+pl[0]+'（太陽高度 '+sunAlt.toFixed(0)+'°，'+(sunAlt>0?'白天':(sunAlt>-6?'暮光':(sunAlt>-18?'天文暮光':'夜晚')))+'）';
+  var h='';objs.forEach(function(o){var alt=o.h.alt/D2R,up=alt>0,ok=o.pid?(alt>5&&sunAlt<-5):(up&&o.n[0]==='月'&&sunAlt<0);
+    var st=o.n==='太陽'?(up?'在天上':'在地平線下'):(o.n[0]==='月'?(up?'在天上':'在地平線下'):(alt>5&&sunAlt<-5?'看得到':(alt>0?'太亮／太低':'在地平線下')));
+    h+='<div class="obj"><i>'+o.ic+'</i><div>'+o.n+'<small>'+(up?'高度 '+alt.toFixed(0)+'°・'+dirName(o.h.az)+'方':'在地平線下')+(o.extra?'・'+o.extra:'')+'</small></div><span class="st '+(ok||(o.n==='太陽'&&up)?'ok':'no')+'">'+st+'</span></div>';});
+  if(h!==frame.h){document.getElementById('objs').innerHTML=h;frame.h=h;}
+  var sh=showerPanel(Y,MO,DA);if(sh!==frame.sh){document.getElementById('showers').innerHTML=sh;frame.sh=sh;}
+  var sb='今天太陽位在<b>'+(ZH[sunCon]||'')+'</b>的方向（依天文位置）。'+(ZODIAC.indexOf(sunCon)>=0?'<a href="zodiac/zodiac_'+sunCon+'.html">看'+ZH[sunCon]+'運勢 →</a>':'')+'<br><span style="opacity:.85">占星學的「太陽星座」按日期劃分，和太陽實際所在的星座約差一個月；而且太陽在天上時，它所在的星座反而看不見。</span>';
+  if(sb!==frame.s){document.getElementById('sunBox').innerHTML=sb;frame.s=sb;}
+  requestAnimationFrame(frame);
+}
+/* ---------- 互動：拖曳旋轉、縮放、點選 ---------- */
+var drag=null;
+function pickHit(x,y){var b=null,bd=1e9;S.hits.forEach(function(h){var dd=Math.hypot(h.x-x,h.y-y)-(h.pri||0)*2;if(dd<h.r&&dd<bd){bd=dd;b=h;}});return b;}
+cv.addEventListener('pointerdown',function(e){cv.setPointerCapture(e.pointerId);drag={x:e.offsetX,y:e.offsetY,az:V.taz,alt:V.talt,m:0};});
+cv.addEventListener('pointermove',function(e){var tip=document.getElementById('smtip');
+  if(drag){var dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;drag.m=Math.max(drag.m,Math.abs(dx)+Math.abs(dy));if(drag.m>5){cv.classList.add('drag');var k=V.half/R*.9;V.taz=(drag.az-dx*k+360)%360;V.talt=Math.max(5,Math.min(90,drag.alt+dy*k));V.az=V.taz;V.alt=V.talt;tip.style.opacity=0;}return;}
+  var b=pickHit(e.offsetX,e.offsetY);cv.style.cursor=b?'pointer':'grab';if(b){tip.textContent=b.n;tip.style.left=e.offsetX+'px';tip.style.top=e.offsetY+'px';tip.style.opacity=1;}else tip.style.opacity=0;});
+cv.addEventListener('pointerup',function(e){cv.classList.remove('drag');if(drag&&drag.m<=5){var b=pickHit(e.offsetX,e.offsetY);if(b){if(b.go)location.href=b.go;else if(b.shower){var p=S.date.split('-');showerInfo(b.shower,+p[0],+p[1],+p[2]);}else if(b.info)showInfo(b.info);}}drag=null;});
+cv.addEventListener('pointerleave',function(){document.getElementById('smtip').style.opacity=0;});
+cv.addEventListener('wheel',function(e){e.preventDefault();V.thalf=Math.max(20,Math.min(120,V.thalf*(e.deltaY<0?.9:1.1)));},{passive:false});
+cv.addEventListener('dblclick',function(){V.taz=180;V.talt=90;V.thalf=90;sel.hidden=true;});
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

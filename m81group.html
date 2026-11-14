@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="M81 星系群：離本星系群最近的大型星系群之一。波德星系、雪茄星系、氫氣橋與星系互動。">
+<title>M81 星系群 — 星宇・探索</title>
+<link rel="icon" type="image/png" href="images/planeticon.png">
+<link rel="stylesheet" href="SEstyle.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cosmos/cosmos.css">
+<link rel="stylesheet" href="cosmos/galaxy.css">
+<meta name="theme-color" content="#060818">
+<style>
+.gx-wrap{height:clamp(420px,68vh,680px)}
+.members{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mem{padding:18px 18px;border-radius:18px;cursor:pointer;transition:.3s var(--ease)}
+.mem:hover,.mem.on{border-color:var(--line-strong)!important;box-shadow:0 0 30px rgba(139,124,246,.25)}
+.mem h3{margin:0 0 4px;font-size:1rem;font-family:var(--font-display)}.mem small{color:var(--teal);letter-spacing:.14em;font-size:.68rem}.mem p{margin:6px 0 0;color:var(--muted);font-size:.84rem;line-height:1.7}
+@media(max-width:860px){.members{grid-template-columns:1fr 1fr}}@media(max-width:520px){.members{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<header class="top-nav">
+  <a href="index.html" class="logo-link"></a>
+  <nav class="menu">
+    <a href="index.html" class="menu-item">主頁</a><a href="SEplanets.html" class="menu-item active">星球</a>
+    <a href="SEother.html" class="menu-item">星座</a><a href="SEfortune.html" class="menu-item">神社</a><a href="SEabout.html" class="menu-item">關於</a>
+  </nav>
+</header>
+<main class="content-area"><div class="main-container">
+  <div class="crumb"><a href="SEplanets.html">← 星系地圖</a><span>/</span><span>M81 星系群</span></div>
+
+  <section class="gal-wrap gx-wrap" id="galWrap">
+    <div class="gal-title"><span class="eyebrow">M81 GROUP · 約 1,200 萬光年</span><h1><span class="grad-text">M81 星系群</span></h1><p>離本星系群最近的大型星系群之一。成員之間正在互相拉扯。</p></div>
+    <div class="gal-tools"><button id="tgBridge" class="on">氣體橋</button><button id="tgLab" class="on">標示</button><button id="tgSpin" class="on">自轉</button></div>
+    <canvas id="gal" aria-label="M81 星系群互動模型"></canvas><div id="gtip"></div>
+    <div class="gal-hint">拖曳移動 · 滾輪縮放 · 點選星系</div>
+  </section>
+
+  <section><div class="poi-card glass" id="poiCard"></div></section>
+
+  <section>
+    <div class="section-head"><h2>主要成員</h2><span>Members</span></div>
+    <div class="members" id="members"></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>什麼是星系群？</h2><span>Galaxy Group</span></div>
+    <div class="grid-4">
+      <div class="fact glass"><small>距離</small><b>約 1,200 萬光年</b><span>光要走 1,200 萬年才到。</span></div>
+      <div class="fact glass"><small>成員數</small><b>已知約 34 個</b><span>大小星系都有。</span></div>
+      <div class="fact glass"><small>所在星座</small><b>大熊座</b><span>靠近北天極，台灣可全年看到。</span></div>
+      <div class="fact glass"><small>與本星系群</small><b>近鄰</b><span>是本星系群外最近的大型星系群之一。</span></div>
+    </div>
+    <p class="disclaim" style="margin-top:12px">星系群比星系團小，通常只有幾個到幾十個星系，靠引力聚在一起；本星系群（有銀河系的那個）也是一個星系群。</p>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>一場千萬年的「拉扯」</h2><span>Interaction</span></div>
+    <div class="ladder glass">
+      <p class="cap">拖曳時間軸，看看三個星系的近距離接觸如何留下氣體橋。</p>
+      <input type="range" id="tl" min="0" max="100" value="100" style="width:100%;accent-color:#8b7cf6">
+      <div class="cmp-h" style="display:flex;justify-content:space-between"><span>很久以前（互相靠近）</span><span id="tlT">現在</span></div>
+      <p class="disclaim" id="tlD" style="margin-top:8px"></p>
+    </div>
+  </section>
+
+  <section class="tips">
+    <div class="glass-card"><h3>🔭 在台灣怎麼看？</h3><ol>
+      <li>M81、M82 在大熊座，靠近北斗七星，台灣緯度全年都在地平線上。</li>
+      <li>春季夜晚最高（約 40°），是最佳觀測季。<span class="season" id="season"></span></li>
+      <li>先找北斗七星的「斗口」，向北極星方向找，用雙筒望遠鏡就能同時看到兩個星系。</li>
+      <li>M81 是較大的旋渦星系，M82 是旁邊一條細長的光帶。</li></ol></div>
+    <div class="glass-card"><h3>💥 SN 2014J</h3><p style="color:#d3dbff;margin:0">2014 年 1 月，M82 出現一顆 Ia 型超新星，是當時近幾十年距離地球最近的一顆。業餘天文愛好者用小望遠鏡就拍到了它，研究也因此獲得許多珍貴資料。</p></div>
+  </section>
+
+  <section><div class="next-gal glass" style="border-style:dashed!important"><div class="orb"></div><div><span class="eyebrow">COMING SOON</span><h3 style="margin-top:8px">下一個星系群：玉夫座星系群</h3><p>另一個離我們不遠的星系群，成員包括玉夫座星系 NGC 253。開發中，敬請期待。</p></div><a class="btn" href="SEplanets.html" style="margin-left:auto">回星系地圖</a></div></section>
+</div></main>
+<footer class="bottom-footer"><div class="footer-grid"><div class="footer-item">DC: <span>yukixiyu</span></div><div class="footer-item">IG: <span>YukixiYu</span></div><div class="footer-item">Gmail: <span>b067941536@gmail.com</span></div></div><p class="footer-note">STAR EXPLORER · 願你在星空下好好放鬆</p></footer>
+</div>
+<script src="cosmos/cosmos.js"></script>
+<script>
+(function(){
+'use strict';
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var MEM=[
+ {id:'m81',n:'M81 波德星系',tag:'螺旋星系・群中最大',x:0,y:0,R:45,kind:'spiral2',inc:58,rot:-20,
+  t:'M81 是這個星系群的「老大」，一個漂亮的螺旋星系，旋臂緊緻，中央有質量約 7,000 萬倍太陽的超大質量黑洞。以十八世紀天文學家波德命名。',kv:[['大小','約 9 萬光年'],['亮度','視星等 6.9（雙筒可見）'],['中心黑洞','約 7,000 萬倍太陽']]},
+ {id:'m82',n:'M82 雪茄星系',tag:'星暴星系',x:-.12,y:.55,R:20,kind:'edge',inc:82,rot:70,
+  t:'M82 形狀細長像雪茄，其實是從側面看的盤狀星系。它受 M81 的引力拉扯，正在快速製造新恆星（約為銀河系的 10 倍），噴出的氣體形成垂直於盤面的「超級風」。',kv:[['大小','約 4 萬光年'],['造星速度','約銀河系 10 倍'],['特色','紅色氫氣噴流']]},
+ {id:'n3077',n:'NGC 3077',tag:'被拉扯的不規則星系',x:.75,y:.42,R:12,kind:'irr',inc:40,rot:0,
+  t:'NGC 3077 曾與 M81 近距離接觸，外形因此被扭曲，也被拉出一條氣體尾巴。它的中央仍在孕育新恆星。',kv:[['類型','特殊星系'],['特色','潮汐扭曲、仍在造星']]},
+ {id:'n2403',n:'NGC 2403',tag:'外圍的螺旋星系',x:-1.8,y:-.55,R:28,kind:'spiral3',inc:62,rot:90,
+  t:'NGC 2403 位於星系群外緣，是個鬆散的螺旋星系，與 M33 有點像，內部有許多明亮的恆星形成區。',kv:[['大小','約 5.5 萬光年'],['亮度','視星等 8.4']]},
+ {id:'ic2574',n:'IC 2574',tag:'矮星系（Coddington 星雲）',x:.55,y:-.92,R:14,kind:'irr',inc:50,rot:30,
+  t:'IC 2574 是個矮星系，擁有大片明亮的氫氣泡，是研究恆星誕生的好對象。',kv:[['類型','矮不規則星系'],['特色','巨大氫氣泡']]},
+ {id:'n2976',n:'NGC 2976',tag:'矮星系',x:-.45,y:-.35,R:9,kind:'ell',inc:60,rot:20,
+  t:'NGC 2976 是一個較小的星系，同樣受到 M81 的引力影響。',kv:[['類型','矮星系'],['大小','約 1.9 萬光年']]}
+];
+var cv=document.getElementById('gal'),ctx=cv.getContext('2d'),wrap=document.getElementById('galWrap'),W,H,dpr;
+var C={zoom:1,tz:1,px:0,py:0,sel:'m81',hover:null,spin:(window.COSMOS?COSMOS.anim:true),lab:true,bridge:true,t:0,tl:1};
+function rnd(){return Math.random();}function gauss(){return (rnd()+rnd()+rnd()+rnd()-2)/.58;}
+function gen(kind,n){var P=[];for(var i=0;i<n;i++){var k=rnd(),r,th,c,a,s;
+  if(kind==='ell'){r=Math.abs(gauss())*.35;th=rnd()*6.283;c=[255,225,180];a=.2+rnd()*.5;s=.6+rnd();}
+  else if(kind==='irr'){var cc=(i%5)*1.2,x=Math.cos(cc)*.4+gauss()*.22,y=Math.sin(cc)*.3+gauss()*.16;r=Math.hypot(x,y);th=Math.atan2(y,x);c=rnd()<.3?[255,150,205]:[180,205,255];a=.15+rnd()*.5;s=.6+rnd();}
+  else if(kind==='edge'){var u=gauss()*.5,v=gauss()*.07;r=Math.hypot(u,v);th=Math.atan2(v,u);c=rnd()<.25?[255,130,170]:[255,225,190];a=.25+rnd()*.5;s=.6+rnd()*1.1;}
+  else if(k<.15){r=Math.abs(gauss())*.08;th=rnd()*6.283;c=[255,225,170];a=.4+rnd()*.5;s=.7+rnd();}
+  else{var arms=kind==='spiral3'?3:2,pitch=kind==='spiral3'?.3:.2;r=-Math.log(1-rnd()*.95)*.3+.05;if(r>1)r=rnd();th=Math.log(r/.05)/Math.tan(pitch)*.56+Math.floor(rnd()*arms)*(6.283/arms)+gauss()*(.12+r*.09);c=rnd()<.22?[255,150,205]:(r<.22?[255,225,170]:[175,205,255]);a=.2+rnd()*.5;s=.6+rnd()*1.1;}
+  P.push({r:r,th:th,c:c,a:a,s:s,w:1/Math.pow(.14+r,.7)});}return P;}
+MEM.forEach(function(m){m.P=gen(m.kind,m.id==='m81'?2600:(m.id==='m82'?1500:1100));});
+var BR=[];(function(){function seg(a,b,n,w){for(var i=0;i<n;i++){var t=rnd(),x=a.x+(b.x-a.x)*t+gauss()*w,y=a.y+(b.y-a.y)*t+gauss()*w;BR.push([x,y,.15+rnd()*.5]);}}
+  var A=MEM[0],B=MEM[1],Cc=MEM[2];seg(A,B,260,.05);seg(A,Cc,260,.05);seg(B,Cc,160,.07);seg(Cc,{x:1.3,y:.8},90,.08);seg(B,{x:-.6,y:1.0},100,.09);})();
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+function sc(){return Math.min(W,H)*.34*C.zoom;}
+function sp(x,y){return {x:W/2+C.px+x*sc(),y:H/2+C.py-y*sc()};}
+var hits=[];
+function drawG(m,p,Rpx){var ci=Math.cos(m.inc*Math.PI/180),cr=Math.cos(m.rot*Math.PI/180),sr=Math.sin(m.rot*Math.PI/180),spin=C.spin&&!reduce?C.t*.04:0;
+  var gr=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,Rpx*1.4);gr.addColorStop(0,'rgba(255,235,200,.35)');gr.addColorStop(.4,'rgba(150,140,240,.09)');gr.addColorStop(1,'rgba(80,80,180,0)');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(p.x,p.y,Rpx*1.4,0,6.283);ctx.fill();
+  ctx.globalCompositeOperation='lighter';var lk='';
+  m.P.forEach(function(q){var th=q.th+spin*q.w,x=Math.cos(th)*q.r*Rpx*1.3,y=Math.sin(th)*q.r*Rpx*1.3*(m.kind==='edge'?1:ci),X=x*cr-y*sr,Y=x*sr+y*cr,key=q.c[0]+','+q.c[1];if(key!==lk){ctx.fillStyle='rgba('+q.c[0]+','+q.c[1]+','+q.c[2]+',.6)';lk=key;}ctx.fillRect(p.x+X,p.y+Y,q.s*Math.max(1,Rpx/50),q.s*Math.max(1,Rpx/50));});
+  ctx.globalCompositeOperation='source-over';}
+function frame(t){var dt=Math.min(.05,(t-(frame.t||t))/1000);frame.t=t;if(C.spin)C.t+=dt;C.zoom+=(C.tz-C.zoom)*Math.min(1,dt*7);
+  ctx.clearRect(0,0,W,H);hits=[];
+  if(C.bridge){ctx.save();ctx.globalCompositeOperation='lighter';BR.forEach(function(b){var p=sp(b[0],b[1]);ctx.fillStyle='rgba(130,200,255,'+(b[2]*.55*C.tl)+')';ctx.fillRect(p.x,p.y,1.6,1.6);});ctx.restore();}
+  MEM.forEach(function(m){var pos=sp(m.x*(.35+.65*C.tl),m.y*(.35+.65*C.tl)),Rpx=m.R/45*sc()*.55;drawG(m,pos,Rpx);
+    var on=C.sel===m.id,h=C.hover===m.id;hits.push({m:m,x:pos.x,y:pos.y,r:Math.max(18,Rpx*.9)});
+    if(C.lab||on){ctx.strokeStyle=on?'rgba(94,234,212,.95)':(h?'rgba(255,255,255,.85)':'rgba(190,200,255,.4)');ctx.lineWidth=on?1.8:1.1;ctx.beginPath();ctx.arc(pos.x,pos.y,(on?13:9)*(on?1+.15*Math.sin(t/300):1),0,6.283);ctx.stroke();
+      ctx.font='500 12px '+getComputedStyle(document.body).fontFamily;ctx.textAlign='left';ctx.fillStyle=on||h?'#fff':'rgba(215,222,255,.78)';ctx.shadowColor='#000';ctx.shadowBlur=6;ctx.fillText(m.n,pos.x+16,pos.y+4);ctx.shadowBlur=0;}});
+  requestAnimationFrame(frame);}
+var drag=null,tip=document.getElementById('gtip');
+function pick(x,y){var b=null,bd=1e9;hits.forEach(function(h){var d=Math.hypot(h.x-x,h.y-y);if(d<h.r&&d<bd){bd=d;b=h;}});return b;}
+cv.addEventListener('pointerdown',function(e){cv.setPointerCapture(e.pointerId);drag={x:e.offsetX,y:e.offsetY,px:C.px,py:C.py,m:0};});
+cv.addEventListener('pointermove',function(e){if(drag){var dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;drag.m=Math.max(drag.m,Math.abs(dx)+Math.abs(dy));if(drag.m>4){C.px=drag.px+dx;C.py=drag.py+dy;cv.classList.add('drag');tip.style.opacity=0;}return;}
+  var h=pick(e.offsetX,e.offsetY);C.hover=h?h.m.id:null;cv.style.cursor=h?'pointer':'grab';if(h){tip.textContent=h.m.n;tip.style.left=e.offsetX+'px';tip.style.top=e.offsetY+'px';tip.style.opacity=1;}else tip.style.opacity=0;});
+cv.addEventListener('pointerup',function(e){cv.classList.remove('drag');if(drag&&drag.m<=4){var h=pick(e.offsetX,e.offsetY);if(h)setSel(h.m.id);}drag=null;});
+cv.addEventListener('wheel',function(e){e.preventDefault();C.tz=Math.max(.5,Math.min(5,C.tz*(e.deltaY<0?1.12:1/1.12)));},{passive:false});
+cv.addEventListener('dblclick',function(){C.tz=1;C.px=C.py=0;});
+document.getElementById('tgLab').onclick=function(){C.lab=!C.lab;this.classList.toggle('on',C.lab);};
+document.getElementById('tgBridge').onclick=function(){C.bridge=!C.bridge;this.classList.toggle('on',C.bridge);};
+document.getElementById('tgSpin').onclick=function(){C.spin=!C.spin;this.classList.toggle('on',C.spin);};
+if(window.COSMOS){COSMOS.onAnim(function(v){C.spin=v;document.getElementById('tgSpin').classList.toggle('on',v);});document.getElementById('tgSpin').classList.toggle('on',C.spin);}
+var card=document.getElementById('poiCard'),mem=document.getElementById('members');
+MEM.forEach(function(m){var d=document.createElement('div');d.className='mem glass';d.dataset.id=m.id;d.innerHTML='<small>'+m.tag+'</small><h3>'+m.n+'</h3><p>'+m.t.slice(0,46)+'…</p>';d.onclick=function(){setSel(m.id);scrollTo({top:wrap.offsetTop-90,behavior:'smooth'});};mem.appendChild(d);});
+function setSel(id){C.sel=id;var m=MEM.filter(function(x){return x.id===id;})[0];mem.querySelectorAll('.mem').forEach(function(d){d.classList.toggle('on',d.dataset.id===id);});
+  card.innerHTML='<h3>'+m.n+' <span class="tag" style="font-size:.72rem;padding:3px 10px;border-radius:99px;border:1px solid var(--line-strong);color:var(--teal);font-family:var(--font)">'+m.tag+'</span></h3><p>'+m.t+'</p><div class="kv">'+m.kv.map(function(k){return '<span>'+k[0]+'：<b>'+k[1]+'</b></span>';}).join('')+'</div>';}
+setSel('m81');
+var TL=[[0,'約 3 億年前','三個星系還在互相靠近，彼此還沒有明顯受影響。'],[35,'約 2 億年前','M81、M82、NGC 3077 近距離擦身而過，引力把氣體從各自身上拉出來。'],[70,'約 1 億年前','氣體被拉成長長的絲帶，連接三個星系，M82 與 NGC 3077 開始爆發式造星。'],[100,'現在','氣體橋清楚可見（需要用電波望遠鏡觀測），M82 仍在激烈造星。']];
+var tl=document.getElementById('tl');function tlUp(){var v=+tl.value,t=TL[0];TL.forEach(function(x){if(v>=x[0])t=x;});C.tl=.35+.65*v/100;document.getElementById('tlT').textContent=t[1];document.getElementById('tlD').textContent=t[2];}tl.oninput=tlUp;tlUp();
+var mm=new Date().getMonth()+1;document.getElementById('season').textContent=(mm>=2&&mm<=5)?'現在正是最佳觀測季':'春季最佳';
+addEventListener('resize',resize);resize();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
