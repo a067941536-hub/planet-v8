@@ -103,6 +103,7 @@
     for (i = 0; i < WEB.n.length; i++) { var ds = []; for (j = 0; j < WEB.n.length; j++) if (j !== i) { var dx = WEB.n[i][0] - WEB.n[j][0], dy = WEB.n[i][1] - WEB.n[j][1]; ds.push([dx * dx + dy * dy, j]); } ds.sort(function (A, B) { return A[0] - B[0]; }); for (j = 0; j < 3; j++) if (ds[j][0] < Math.pow(ly(1.1e10), 2)) { var A2 = WEB.n[i], B2 = WEB.n[ds[j][1]], pts = [], dxx = B2[0] - A2[0], dyy = B2[1] - A2[1], pj; for (pj = 0; pj < 14; pj++) { var tt = rnd(), jj = gauss() * .07; pts.push([A2[0] + dxx * tt - dyy * jj, A2[1] + dyy * tt + dxx * jj, .3 + rnd() * .6]); } WEB.e.push([i, ds[j][1], pts]); } }
   })();
   var WARP = []; for (var wi = 0; wi < 90; wi++) WARP.push([rnd() * TAU, .06 + rnd() * .9, rnd()]);
+  var ES = 1; QUALITY.onChange(function (l) { ES = l === 'low' ? 3 : (l === 'medium' ? 1 : 1); }); if (QUALITY.level === 'low') ES = 3;
   var SUPER = { n: '室女座超星系團', pos: GBY.m87.pos, R: ly(55e6) };
   // 本星系群的小矮星系、本地恆星雲
   var DWARFS = []; (function () {
@@ -135,7 +136,7 @@
     return P;
   }
   var GP = {}, SPR = {};
-  function parts(g) { var key = g.id; return GP[key] || (GP[key] = genGal(g.kind, g.parts || 1800)); }
+  function parts(g) { var key = g.id; return GP[key] || (GP[key] = genGal(g.kind, Math.round((g.parts || 1800) * QUALITY.cfg.galaxy))); }
   function drawParts(c, P, Rpx, spin, alpha, inc, rot, sizeK) {
     var ci = Math.cos(inc * DEG), cr = Math.cos(rot * DEG), sr = Math.sin(rot * DEG), lastKey = '', n = P.length;
     c.globalCompositeOperation = 'lighter';
@@ -150,7 +151,7 @@
   function sprite(g) { // 正面 256px 預渲染
     if (SPR[g.kind]) return SPR[g.kind];
     var cn = document.createElement('canvas'); cn.width = cn.height = 256; var c = cn.getContext('2d'); c.__cx = 128; c.__cy = 128;
-    var P = genGal(g.kind, g.kind === 'ell' ? 900 : (g.kind === 'irr' ? 800 : 2600));
+    var P = genGal(g.kind, Math.round((g.kind === 'ell' ? 900 : (g.kind === 'irr' ? 800 : 2600)) * Math.max(.5, QUALITY.cfg.galaxy)));
     var gr = c.createRadialGradient(128, 128, 0, 128, 128, 126); gr.addColorStop(0, 'rgba(255,235,200,.55)'); gr.addColorStop(.25, 'rgba(200,190,255,.16)'); gr.addColorStop(1, 'rgba(100,100,220,0)');
     c.fillStyle = gr; c.fillRect(0, 0, 256, 256); drawParts(c, P, 120, 0, 1.25, 0, 0, 1.6); return (SPR[g.kind] = cn);
   }
@@ -232,7 +233,7 @@
     ctx.clearRect(0, 0, W, H); labels = []; hits = [];
     var sx = X(0), sy = Y(0);
     if (COSMOS.anim && S.vL > .45) { var wa = clamp((S.vL - .45) / 1.4, 0, .6), wl = H * (.08 + clamp(S.vL / 3, 0, .5)); ctx.save(); ctx.lineCap = 'round'; ctx.globalCompositeOperation = 'lighter';
-      WARP.forEach(function (w) { var r1 = (w[1] * .55 + ((spinT * (.5 + S.vL * .4) + w[2]) % 1) * .6) * Math.max(W, H) * .6, r2 = r1 + wl * (.4 + w[2]); ctx.strokeStyle = 'rgba(' + (w[2] > .5 ? '170,200,255' : '255,220,190') + ',' + (wa * (.25 + w[2] * .6)) + ')'; ctx.lineWidth = .6 + w[2] * 1.4; ctx.beginPath(); ctx.moveTo(cx0 + Math.cos(w[0]) * r1, cy0 + Math.sin(w[0]) * r1); ctx.lineTo(cx0 + Math.cos(w[0]) * r2, cy0 + Math.sin(w[0]) * r2); ctx.stroke(); }); ctx.restore(); }
+      WARP.slice(0, Math.max(10, Math.round(WARP.length * QUALITY.cfg.stars))).forEach(function (w) { var r1 = (w[1] * .55 + ((spinT * (.5 + S.vL * .4) + w[2]) % 1) * .6) * Math.max(W, H) * .6, r2 = r1 + wl * (.4 + w[2]); ctx.strokeStyle = 'rgba(' + (w[2] > .5 ? '170,200,255' : '255,220,190') + ',' + (wa * (.25 + w[2] * .6)) + ')'; ctx.lineWidth = .6 + w[2] * 1.4; ctx.beginPath(); ctx.moveTo(cx0 + Math.cos(w[0]) * r1, cy0 + Math.sin(w[0]) * r1); ctx.lineTo(cx0 + Math.cos(w[0]) * r2, cy0 + Math.sin(w[0]) * r2); ctx.stroke(); }); ctx.restore(); }
 
     /* 距離環（光年） */
     [1, 10, 100, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8].forEach(function (v, i) {
@@ -242,7 +243,7 @@
 
     /* 本地恆星雲 */
     var aLoc = win(L, 17.2, 18.4, 20.4, 21.6);
-    if (aLoc > .01) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (var i = 0; i < LOCAL.length; i++) { var p = LOCAL[i], x = X(p[0]), y = Y(p[1]); if (x < 0 || x > W || y < 0 || y > H) continue; ctx.fillStyle = 'rgba(' + (p[3] < .2 ? '255,220,170' : '200,220,255') + ',' + (p[2] * aLoc * .9) + ')'; var s = p[2] > .6 ? 2 : 1.2; ctx.fillRect(x, y, s, s); } ctx.restore(); }
+    if (aLoc > .01) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (var i = 0, LN = LOCAL.length * QUALITY.cfg.stars; i < LN; i++) { var p = LOCAL[i], x = X(p[0]), y = Y(p[1]); if (x < 0 || x > W || y < 0 || y > H) continue; ctx.fillStyle = 'rgba(' + (p[3] < .2 ? '255,220,170' : '200,220,255') + ',' + (p[2] * aLoc * .9) + ')'; var s = p[2] > .6 ? 2 : 1.2; ctx.fillRect(x, y, s, s); } ctx.restore(); }
 
     /* 銀河系與其他星系 */
     var aGal = win(L, 19.3, 20.4, 26, 27);
@@ -293,8 +294,8 @@
     var aWeb = win(L, 25.0, 25.9, 28, 29);
     if (aWeb > .02) {
       ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = 1;
-      WEB.e.forEach(function (e) { var A = WEB.n[e[0]], B = WEB.n[e[1]]; ctx.strokeStyle = 'rgba(110,140,255,' + (.07 * aWeb) + ')'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(X(A[0]), Y(A[1])); ctx.lineTo(X(B[0]), Y(B[1])); ctx.stroke(); e[2].forEach(function (p) { var px = X(p[0]), py = Y(p[1]); if (px > 0 && px < W && py > 0 && py < H) { ctx.fillStyle = 'rgba(200,215,255,' + (p[2] * .7 * aWeb) + ')'; ctx.fillRect(px, py, 1.6, 1.6); } }); });
-      WEB.n.forEach(function (n) { var x = X(n[0]), y = Y(n[1]); if (!onscreen(x, y, 12)) return; glow(x, y, 4 + n[2] * 6, n[2] > .7 ? '255,215,170' : '170,195,255', .38 * aWeb * n[2]); });
+      WEB.e.forEach(function (e, ei) { if (ei % ES) return; var A = WEB.n[e[0]], B = WEB.n[e[1]]; ctx.strokeStyle = 'rgba(110,140,255,' + (.07 * aWeb) + ')'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(X(A[0]), Y(A[1])); ctx.lineTo(X(B[0]), Y(B[1])); ctx.stroke(); e[2].forEach(function (p) { var px = X(p[0]), py = Y(p[1]); if (px > 0 && px < W && py > 0 && py < H) { ctx.fillStyle = 'rgba(200,215,255,' + (p[2] * .7 * aWeb) + ')'; ctx.fillRect(px, py, 1.6, 1.6); } }); });
+      WEB.n.forEach(function (n, ni) { if (ni % ES) return; var x = X(n[0]), y = Y(n[1]); if (!onscreen(x, y, 12)) return; glow(x, y, 4 + n[2] * 6, n[2] > .7 ? '255,215,170' : '170,195,255', .38 * aWeb * n[2]); });
       ctx.restore();
       var rb = WEB.R * sc; dashedCircle(sx, sy, rb, .3 * aWeb); if (L > 26.1) ringLabel(sx, sy, rb, '可觀測宇宙邊界（直徑約 930 億光年）', aWeb, -90);
       if (L > 25.4) label(sx + 10, sy - 10, '我們在這裡', aWeb, null, 13, '#ffd98a');
@@ -354,7 +355,7 @@
       var px = X(c.x), py = Y(c.y), lw = 1;
       if (c.stream && L > 10.2 && L < 14.4) {
         var as = win(L, 10.2, 11.2, 13.2, 14.4); ctx.fillStyle = 'rgb(190,215,255)';
-        c.stream.forEach(function (st) { var x = X(st[0] * AU), y = Y(st[1] * AU); if (x > 0 && x < W && y > 0 && y < H) { ctx.globalAlpha = st[2] * as * .85; ctx.fillRect(x, y, 1.4, 1.4); } }); ctx.globalAlpha = 1;
+        c.stream.slice(0, Math.round(c.stream.length * QUALITY.cfg.part)).forEach(function (st) { var x = X(st[0] * AU), y = Y(st[1] * AU); if (x > 0 && x < W && y > 0 && y < H) { ctx.globalAlpha = st[2] * as * .85; ctx.fillRect(x, y, 1.4, 1.4); } }); ctx.globalAlpha = 1;
         c.cross.forEach(function (k) { if (!k.name) return; var x = X(k.x * AU), y = Y(k.y * AU); if (!onscreen(x, y, 20)) return; ctx.strokeStyle = 'rgba(255,230,160,' + (.85 * as) + ')'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(x, y, 7, 0, TAU); ctx.stroke(); label(x + 11, y + 15, k.name + '・每年約 ' + k.date, as, null, 11.5, '#ffe3a8'); });
       }
       if (L > 9.0) { ctx.strokeStyle = 'rgba(150,200,255,' + (.28 * aSol) + ')'; ctx.lineWidth = 1; ctx.setLineDash([2, 5]); ctx.beginPath(); c.orb.forEach(function (p, i) { var ox = X(p[0] * AU), oy = Y(p[1] * AU); if (i) ctx.lineTo(ox, oy); else ctx.moveTo(ox, oy); }); ctx.stroke(); ctx.setLineDash([]); }
@@ -438,6 +439,7 @@
     else if (close) { if (cm) { title = cm.n; text = COMFACT[cm.id] + '（此刻距太陽 ' + cm.r.toFixed(1) + ' AU）'; } else { var o = S.focus === 'sun' ? SUN : (S.focus === 'moon' ? MOON : PBY[S.focus]); title = o.n; text = o.fact; } }
     else { var ly2 = LAYERS.filter(function (x) { return L >= x[0] && L < x[1]; })[0] || LAYERS[1]; title = ly2[2] || '行星近景'; text = ly2[3] || '點選下方的天體，或繼續放大／縮小。'; }
     document.getElementById('moonLink').style.display = (S.focus === 'moon' && L < 9.5) ? '' : 'none';
+    document.getElementById('marsLink').style.display = (S.focus === 'mars' && L < 9.5) ? '' : 'none';
     var key = title; if (key !== lastKey) { lastKey = key; els.title.textContent = title; els.text.textContent = text; var c = document.getElementById('layerCard'); c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); }
     var r = (LMAX - L) / (LMAX - LMIN); els.thumb.style.top = (r * 100) + '%';
   }
@@ -456,6 +458,8 @@
   zbar.addEventListener('pointerdown', function (e) { zdrag = true; zbar.setPointerCapture(e.pointerId); zSet(e); });
   zbar.addEventListener('pointermove', function (e) { if (zdrag) zSet(e); }); zbar.addEventListener('pointerup', function () { zdrag = false; });
   document.getElementById('zIn').onclick = function () { S.anim = null; S.auto = 0; setPlay(); S.Lt = clamp(S.Lt - .5, LMIN, LMAX); };
+  QUALITY.mount(document.getElementById('layerCard'), { desc: false });
+  QUALITY.onChange(function () { GP = {}; SPR = {}; resize(); });
   var bAnim = document.getElementById('btnAnim'), bCen = document.getElementById('btnCenter');
   function animLab() { bAnim.textContent = COSMOS.anim ? '✨ 動畫：開' : '✨ 動畫：關'; bAnim.classList.toggle('on', COSMOS.anim); }
   bAnim.onclick = function () { COSMOS.setAnim(!COSMOS.anim); }; COSMOS.onAnim(animLab); animLab();
@@ -478,7 +482,7 @@
   cv.addEventListener('pointerleave', function () { document.getElementById('tip').style.opacity = 0; });
   document.addEventListener('keydown', function (e) { if (!S.tour && /^Arrow/.test(e.key)) { var st = Math.min(W, H) * .12 / (Math.min(W, H) / Math.pow(10, S.L)); S.anim = null; if (e.key === 'ArrowLeft') S.pan[0] -= st; if (e.key === 'ArrowRight') S.pan[0] += st; if (e.key === 'ArrowUp') S.pan[1] += st; if (e.key === 'ArrowDown') S.pan[1] -= st; }
     if (e.key === '+' || e.key === '=') S.Lt = clamp(S.Lt - .4, LMIN, LMAX); if (e.key === '-') S.Lt = clamp(S.Lt + .4, LMIN, LMAX); if (e.key === ' ' && document.activeElement === document.body) { e.preventDefault(); playBtn.click(); } });
-  function resize() { dpr = Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function resize() { dpr = QUALITY.dpr(); W = stage.clientWidth; H = stage.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
   addEventListener('resize', resize); resize();
   // 小行星/鄰居也能點擊：補上沒有預設目標者的目標
   GALS.forEach(function (g) { if (!TARGETS[g.id]) TARGETS[g.id] = [g.id, Math.log10(g.D * 2.4)]; });

@@ -113,7 +113,7 @@
   }
   // opts: lx,ly (螢幕上朝向太陽的單位向量), spin, atm [r,g,b], emissive
   function sphere(ctx, name, cx, cy, R, opts) {
-    var t = make(name), N = cl(Math.round(R * 2), 20, 360), D = disc(N);
+    var t = make(name), N = cl(Math.round(R * 2), 20, (root.QUALITY ? root.QUALITY.cfg.tex : 360)), D = disc(N);
     off.width = N; off.height = N; var img = octx.createImageData(N, N), px = img.data;
     var lx = opts.lx * .82, ly = opts.ly * .82, lz = opts.lz !== undefined ? opts.lz : .58, ln = Math.sqrt(lx * lx + ly * ly + lz * lz); lx /= ln; ly /= ln; lz /= ln;
     var spin = opts.spin || 0, atm = opts.atm, em = opts.emissive, TW = t.w, TH = t.h, td = t.d, TAU = Math.PI * 2;

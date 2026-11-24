@@ -21,6 +21,8 @@
   };
   document.documentElement.classList.toggle('no-anim', !COSMOS.anim);
 
+  QUALITY.onChange(function () { if (document.body.hasAttribute('data-q-reload')) setTimeout(function () { location.reload(); }, 250); });
+
   document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add('cosmos-enter');
     if (inPlanet) document.body.classList.add('sub-planet');
@@ -53,9 +55,9 @@
     var x = c.getContext('2d'), W, H, dpr, stars = [], shoots = [], mx = 0, my = 0, tx = 0, ty = 0, running = true;
 
     function size() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = QUALITY.dpr();
       W = c.width = innerWidth * dpr; H = c.height = innerHeight * dpr;
-      var n = Math.min(260, Math.floor(innerWidth * innerHeight / 7000));
+      var n = Math.max(30, Math.round(Math.min(260, Math.floor(innerWidth * innerHeight / 7000)) * QUALITY.cfg.stars));
       stars = [];
       for (var i = 0; i < n; i++) {
         var layer = Math.random() < .6 ? 0 : (Math.random() < .7 ? 1 : 2);
@@ -67,12 +69,12 @@
         });
       }
     }
-    size(); addEventListener('resize', size);
+    size(); addEventListener('resize', size); QUALITY.onChange(function () { size(); });
     addEventListener('pointermove', function (e) { tx = e.clientX / innerWidth - .5; ty = e.clientY / innerHeight - .5; }, { passive: true });
     document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) frame(); });
 
     function spawnShoot() {
-      if (!running || reduce || !COSMOS.anim) return;
+      if (!running || reduce || !COSMOS.anim || !QUALITY.cfg.shoot) return;
       shoots.push({ x: Math.random() * W * .8, y: Math.random() * H * .4, vx: (7 + Math.random() * 5) * dpr, vy: (3 + Math.random() * 3) * dpr, life: 1 });
     }
     (function loop() { setTimeout(function () { spawnShoot(); loop(); }, 6000 + Math.random() * 9000); })();
@@ -183,6 +185,14 @@
     function afLab() { af.innerHTML = '<span class="ico">✨</span><span>動畫 ' + (COSMOS.anim ? '開' : '關') + '</span>'; af.classList.toggle('on', COSMOS.anim); af.setAttribute('aria-pressed', COSMOS.anim); }
     af.onclick = function () { COSMOS.setAnim(!COSMOS.anim); }; COSMOS.onAnim(afLab); afLab();
     document.body.appendChild(af);
+    var qf = document.createElement('button');
+    qf.className = 'sound-fab quality-fab';
+    var qm = document.createElement('div'); qm.className = 'q-menu'; qm.innerHTML = '<h4>畫質與效能</h4>'; QUALITY.mount(qm);
+    function qLab() { qf.innerHTML = '<span class="ico">⚙</span><span>畫質：' + QUALITY.cfg.label + '</span>'; }
+    qf.onclick = function (e) { e.stopPropagation(); qm.classList.toggle('open'); };
+    document.addEventListener('click', function (e) { if (!qm.contains(e.target) && e.target !== qf && !qf.contains(e.target)) qm.classList.remove('open'); });
+    QUALITY.onChange(qLab); qLab();
+    document.body.appendChild(qf); document.body.appendChild(qm);
     var ac, master, nodes = [], on = false;
 
     function start() {
@@ -276,7 +286,7 @@
     function rs() { c.width = innerWidth; c.height = innerHeight; } rs(); addEventListener('resize', rs);
     var hues = [175, 255, 45, 210];
     addEventListener('pointermove', function (e) {
-      if (!COSMOS.anim) return;
+      if (!COSMOS.anim || !QUALITY.cfg.trail) return;
       for (var i = 0; i < 2; i++) P.push({ x: e.clientX, y: e.clientY, vx: (Math.random() - .5) * 1.2, vy: -Math.random() * .9 - .1, r: Math.random() * 1.8 + .6, l: 1, d: Math.random() * .02 + .014, h: hues[Math.random() * 4 | 0] });
     }, { passive: true });
     addEventListener('click', function (e) {

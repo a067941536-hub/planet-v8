@@ -427,3 +427,25 @@ body{margin:0!important}
 .grp-open b{position:absolute;left:8%;top:70%;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,rgba(200,215,255,.8),transparent 70%)}
 .grp-open.locked{filter:none;opacity:.55}
 .g-model .grp-open{zoom:1.05;left:2%}
+
+/* ---------- 畫質（高／中／低）---------- */
+.q-seg{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.q-seg .q-lab{color:var(--dim);font-size:.68rem;letter-spacing:.2em;margin-right:4px}
+.q-seg button{font:inherit;font-size:.78rem;color:var(--muted);background:rgba(139,124,246,.08);border:1px solid var(--line);border-radius:99px;padding:4px 13px;cursor:pointer;transition:.25s var(--ease)}
+.q-seg button:hover{color:#fff;border-color:var(--line-strong)}
+.q-seg button.on{color:#fff;background:linear-gradient(135deg,rgba(139,124,246,.55),rgba(94,234,212,.3));border-color:var(--line-strong)}
+.q-seg .q-desc{flex:1 1 100%;color:var(--dim);font-size:.7rem;line-height:1.6;margin-top:4px}
+.q-menu{position:fixed;left:22px;bottom:70px;z-index:950;width:260px;padding:14px 16px;border-radius:18px;background:rgba(8,12,36,.92);border:1px solid var(--line-strong);backdrop-filter:blur(14px);display:none}
+.q-menu.open{display:block;animation:cardIn .35s var(--ease)}
+.q-menu h4{margin:0 0 8px;font-size:.8rem;letter-spacing:.2em;color:var(--teal);font-weight:500}
+.quality-fab{left:296px}
+@media(max-width:600px){.quality-fab{left:114px}.q-menu{left:12px;bottom:64px}}
+/* 低畫質：關掉最吃效能的視覺效果 */
+.q-low *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.q-low .glass,.q-low .glass-card,.q-low .top-nav,.q-low .bottom-footer{background:rgba(10,14,40,.88)!important}
+.q-low .cosmos-bg i{display:none}
+.q-low .cosmos-bg{animation:none!important}
+.q-low .hero-orbit .ring,.q-low .feature-card::before{animation:none}
+.q-low .reveal{transition-duration:.25s}
+.q-medium .cosmos-bg i{filter:blur(46px)}
+.q-medium .cosmos-bg .a3{display:none}

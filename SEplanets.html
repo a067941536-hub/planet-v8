@@ -142,6 +142,11 @@
                 </div>
             </div>
 
+            <a class="journey-banner glass" id="marsBanner" href="mars.html">
+                <span class="jb-ico">🔴</span>
+                <span><b>站上火星（第一人稱）</b><small>蓋爾隕石坑、奧林帕斯山、水手號峽谷，依真實尺度、含火衛一與藍色日落</small></span>
+                <span class="jb-go">出發 →</span>
+            </a>
             <a class="journey-banner glass" id="moonBanner" href="moon.html">
                 <span class="jb-ico">🌙</span>
                 <span><b>站上月球（第一人稱）</b><small>在靜海基地用 1/6 重力走路、跳躍，抬頭看地球</small></span>
@@ -348,6 +353,7 @@
             document.getElementById('galaxy-menu').style.display = 'none';
             document.getElementById('journeyBanner').style.display = 'none';
             document.getElementById('moonBanner').style.display = 'none';
+            document.getElementById('marsBanner').style.display = 'none';
             document.getElementById('nebBanner').style.display = 'none';
             document.getElementById('solar-detail-grid').style.display = 'block';
         }
@@ -356,12 +362,14 @@
             document.getElementById('galaxy-menu').style.display = '';
             document.getElementById('journeyBanner').style.display = '';
             document.getElementById('moonBanner').style.display = '';
+            document.getElementById('marsBanner').style.display = '';
             document.getElementById('nebBanner').style.display = '';
             document.getElementById('solar-detail-grid').style.display = 'none';
         }
     window.addEventListener('popstate', function () { if (location.hash === '#solar') showSolarDetail(true); else hideSolarDetail(true); });
         if (location.hash === '#solar') showSolarDetail(true);
     </script>
+<script src="cosmos/quality.js"></script>
 <script src="cosmos/cosmos.js"></script>
 </body>
 </html>

@@ -21,7 +21,7 @@
 @media(max-width:860px){.members{grid-template-columns:1fr 1fr}}@media(max-width:520px){.members{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
+<body data-q-reload>
 <div class="wrapper">
 <header class="top-nav">
   <a href="index.html" class="logo-link"></a>
@@ -81,6 +81,7 @@
 </div></main>
 <footer class="bottom-footer"><div class="footer-grid"><div class="footer-item">DC: <span>yukixiyu</span></div><div class="footer-item">IG: <span>YukixiYu</span></div><div class="footer-item">Gmail: <span>b067941536@gmail.com</span></div></div><p class="footer-note">STAR EXPLORER · 願你在星空下好好放鬆</p></footer>
 </div>
+<script src="cosmos/quality.js"></script>
 <script src="cosmos/cosmos.js"></script>
 <script>
 (function(){
@@ -110,10 +111,10 @@ function gen(kind,n){var P=[];for(var i=0;i<n;i++){var k=rnd(),r,th,c,a,s;
   else if(k<.15){r=Math.abs(gauss())*.08;th=rnd()*6.283;c=[255,225,170];a=.4+rnd()*.5;s=.7+rnd();}
   else{var arms=kind==='spiral3'?3:2,pitch=kind==='spiral3'?.3:.2;r=-Math.log(1-rnd()*.95)*.3+.05;if(r>1)r=rnd();th=Math.log(r/.05)/Math.tan(pitch)*.56+Math.floor(rnd()*arms)*(6.283/arms)+gauss()*(.12+r*.09);c=rnd()<.22?[255,150,205]:(r<.22?[255,225,170]:[175,205,255]);a=.2+rnd()*.5;s=.6+rnd()*1.1;}
   P.push({r:r,th:th,c:c,a:a,s:s,w:1/Math.pow(.14+r,.7)});}return P;}
-MEM.forEach(function(m){m.P=gen(m.kind,m.id==='m81'?2600:(m.id==='m82'?1500:1100));});
+MEM.forEach(function(m){m.P=gen(m.kind,Math.round((m.id==='m81'?2600:(m.id==='m82'?1500:1100))*QUALITY.cfg.galaxy));});
 var BR=[];(function(){function seg(a,b,n,w){for(var i=0;i<n;i++){var t=rnd(),x=a.x+(b.x-a.x)*t+gauss()*w,y=a.y+(b.y-a.y)*t+gauss()*w;BR.push([x,y,.15+rnd()*.5]);}}
   var A=MEM[0],B=MEM[1],Cc=MEM[2];seg(A,B,260,.05);seg(A,Cc,260,.05);seg(B,Cc,160,.07);seg(Cc,{x:1.3,y:.8},90,.08);seg(B,{x:-.6,y:1.0},100,.09);})();
-function resize(){dpr=Math.min(devicePixelRatio||1,2);W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+function resize(){dpr=QUALITY.dpr();W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
 function sc(){return Math.min(W,H)*.34*C.zoom;}
 function sp(x,y){return {x:W/2+C.px+x*sc(),y:H/2+C.py-y*sc()};}
 var hits=[];

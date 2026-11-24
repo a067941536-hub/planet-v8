@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="cosmos/galaxy.css">
 <meta name="theme-color" content="#060818">
 </head>
-<body>
+<body data-q-reload>
 <div class="wrapper">
 <header class="top-nav">
   <a href="index.html" class="logo-link"></a>
@@ -126,6 +126,7 @@
   <p class="footer-note">STAR EXPLORER · 願你在星空下好好放鬆</p>
 </footer>
 </div>
+<script src="cosmos/quality.js"></script>
 <script src="cosmos/cosmos.js"></script>
 <script>
 (function(){
@@ -147,7 +148,7 @@ var G={pa:.3,inc:.45,spin:(window.COSMOS?COSMOS.anim:true),lab:true,sel:'core',h
 function rnd(){return Math.random();}
 function gauss(){return (rnd()+rnd()+rnd()+rnd()-2)/.58;}
 (function build(){
-  var N=reduce?4200:8800;
+  var N=Math.round((reduce?4200:8800)*QUALITY.cfg.galaxy);
   for(var i=0;i<N;i++){
     var k=rnd(),s;
     if(k<.1){var r=Math.abs(gauss())*.05,th=rnd()*6.283;s={r:r,th:th,c:[255,235,190],a:.4+rnd()*.5,s:.6+rnd()*1,z:gauss()*.02};}
@@ -161,7 +162,7 @@ function gauss(){return (rnd()+rnd()+rnd()+rnd()-2)/.58;}
     stars.push(s);
   }
 })();
-function resize(){dpr=Math.min(devicePixelRatio||1,2);W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);R=Math.min(W*.4,H*.78);}
+function resize(){dpr=QUALITY.dpr();W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);R=Math.min(W*.4,H*.78);}
 function proj(x,y,z){
   var ca=Math.cos(G.pa),sa=Math.sin(G.pa),rx=x*ca-y*sa,ry=x*sa+y*ca,ci=Math.cos(G.inc),si=Math.sin(G.inc);
   return {x:W/2+rx*R*1.5+G.mx*16,y:H/2+(ry*ci+z*si)*R*1.5+G.my*12};

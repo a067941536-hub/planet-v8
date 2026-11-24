@@ -83,6 +83,7 @@ input[type=range]{width:100%;accent-color:#8b7cf6}
   </aside>
 </div>
 </div>
+<script src="cosmos/quality.js"></script>
 <script src="cosmos/cosmos.js"></script>
 <script src="cosmos/astro.js"></script>
 <script src="cosmos/starmap-data.js"></script>
@@ -114,8 +115,8 @@ var q=new URLSearchParams(location.search).get('sign');if(q&&ZH[q]){S.sign=q;myS
 setNow();
 function utc(){var p=S.date.split('-'),pl=SM.PLACES[S.place];return Date.UTC(+p[0],+p[1]-1,+p[2],0,0)+S.min*60000-pl[3]*3600e3;}
 function altaz(ra,dec,d){var pl=SM.PLACES[S.place];return ASTRO.horiz(ra,dec,pl[1],pl[2],d);}
-function resize(){dpr=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);mob=W<860;cx=W/2;cy=mob?H*.34:H/2;R=Math.min(W*.47,mob?H*.3:H*.46);}
-addEventListener('resize',resize);resize();
+function resize(){dpr=QUALITY.dpr();W=stage.clientWidth;H=stage.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);mob=W<860;cx=W/2;cy=mob?H*.34:H/2;R=Math.min(W*.47,mob?H*.3:H*.46);}
+addEventListener('resize',resize);QUALITY.onChange(resize);QUALITY.mount(document.querySelector('.sm-left'),{desc:false});resize();
 /* ---------- 視角投影：以觀看方向為中心的等距方位投影 ---------- */
 var BS=null;
 function basis(){var a=V.alt*D2R,z=V.az*D2R,f=[Math.cos(a)*Math.sin(z),Math.cos(a)*Math.cos(z),Math.sin(a)],u=[-Math.sin(a)*Math.sin(z),-Math.sin(a)*Math.cos(z),Math.cos(a)];
@@ -161,7 +162,7 @@ function frame(t){
   ctx.clearRect(0,0,W,H);S.hits=[];
   ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,PI*2);ctx.clip();
   var g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,col(top));g.addColorStop(1,col(bot));ctx.fillStyle=g;ctx.fillRect(cx-R,cy-R,R*2,R*2);
-  if(S.tg.mw){ctx.globalCompositeOperation='lighter';SM.MW.forEach(function(p){var h=altaz(p.ra,p.dec,d);if(h.alt<0)return;var o=proj(h);if(!o.ok)return;ctx.fillStyle='rgba(190,200,255,'+(.11*p.w*starA)+')';ctx.beginPath();ctx.arc(o.x,o.y,2.6,0,PI*2);ctx.fill();});ctx.globalCompositeOperation='source-over';}
+  if(S.tg.mw){ctx.globalCompositeOperation='lighter';SM.MW.slice(0,Math.round(SM.MW.length*QUALITY.cfg.stars)).forEach(function(p){var h=altaz(p.ra,p.dec,d);if(h.alt<0)return;var o=proj(h);if(!o.ok)return;ctx.fillStyle='rgba(190,200,255,'+(.11*p.w*starA)+')';ctx.beginPath();ctx.arc(o.x,o.y,2.6,0,PI*2);ctx.fill();});ctx.globalCompositeOperation='source-over';}
   if(S.tg.grid){ctx.strokeStyle='rgba(165,178,255,.13)';ctx.lineWidth=1;[30,60].forEach(function(a){curve(function(t){return {alt:a*D2R,az:t*2*PI};},120);});[0,90,180,270].forEach(function(a){curve(function(t){return {alt:t*PI/2,az:a*D2R};},30);});}
   if(S.tg.ecl){ctx.strokeStyle='rgba(253,231,165,.4)';ctx.setLineDash([5,6]);ctx.lineWidth=1.2;curve(function(t){var e=ASTRO.eclToEq(t*2*PI,0,d),h=altaz(e.ra,e.dec,d);if(h.alt<-.02)h={alt:-1,az:h.az};return h;},240);ctx.setLineDash([]);}
   var sunCon=conOf(sun.lon/D2R);ctx.font='500 12px '+FONT;ctx.textAlign='center';

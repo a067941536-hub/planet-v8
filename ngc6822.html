@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="cosmos/galaxy.css">
 <meta name="theme-color" content="#060818">
 </head>
-<body>
+<body data-q-reload>
 <div class="wrapper">
 <header class="top-nav">
   <a href="index.html" class="logo-link"></a>
@@ -122,6 +122,7 @@
   <p class="footer-note">STAR EXPLORER · 願你在星空下好好放鬆</p>
 </footer>
 </div>
+<script src="cosmos/quality.js"></script>
 <script src="cosmos/cosmos.js"></script>
 <script>
 (function(){
@@ -143,7 +144,7 @@ var G={pa:.25,inc:.55,spin:(window.COSMOS?COSMOS.anim:true),lab:true,sel:'core',
 function rnd(){return Math.random();}
 function gauss(){return (rnd()+rnd()+rnd()+rnd()-2)/.58;}
 (function build(){
-  var N=reduce?3600:7200;
+  var N=Math.round((reduce?3600:7200)*QUALITY.cfg.galaxy);
   for(var i=0;i<N;i++){
     var k=rnd(),x,y,c,a,sz,z=gauss()*.02;
     if(k<.42){var u=gauss()*.5,v=gauss()*.1,ang=-.5;x=u*Math.cos(ang)-v*Math.sin(ang);y=u*Math.sin(ang)+v*Math.cos(ang);c=rnd()<.5?[255,225,185]:[200,220,255];a=.3+rnd()*.5;sz=.6+rnd()*1.1;}
@@ -155,7 +156,7 @@ function gauss(){return (rnd()+rnd()+rnd()+rnd()-2)/.58;}
     stars.push({r:r,th:th,c:c,a:a,s:sz,z:z});
   }
 })();
-function resize(){dpr=Math.min(devicePixelRatio||1,2);W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);R=Math.min(W*.4,H*.78);}
+function resize(){dpr=QUALITY.dpr();W=wrap.clientWidth;H=wrap.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);R=Math.min(W*.4,H*.78);}
 function proj(x,y,z){
   var ca=Math.cos(G.pa),sa=Math.sin(G.pa),rx=x*ca-y*sa,ry=x*sa+y*ca,ci=Math.cos(G.inc),si=Math.sin(G.inc);
   return {x:W/2+rx*R*1.5+G.mx*16,y:H/2+(ry*ci+z*si)*R*1.5+G.my*12};

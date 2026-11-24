@@ -129,6 +129,7 @@ html,body{overflow:hidden}
 </div>
 </div>
 
+<script src="cosmos/quality.js"></script>
 <script src="cosmos/cosmos.js"></script>
 <script src="cosmos/astro.js"></script>
 <script>
@@ -207,7 +208,7 @@ function pos(b){
 
 /* ---------- 繪圖 ---------- */
 function resize(){
-  dpr=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;
+  dpr=QUALITY.dpr();W=stage.clientWidth;H=stage.clientHeight;
   cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 function drawSun(t){
@@ -437,7 +438,7 @@ cv.addEventListener('wheel',function(e){e.preventDefault();
   if(!S.follow){S.px=cx-(cx-S.px)*r;S.py=cy-(cy-S.py)*r;}S.tz=nz;S.zoom=nz;},{passive:false});
 cv.addEventListener('dblclick',resetView);
 
-addEventListener('resize',resize);resize();renderInfo();requestAnimationFrame(frame);
+addEventListener('resize',resize);QUALITY.onChange(resize);QUALITY.mount(document.querySelector('.p-left'));resize();renderInfo();requestAnimationFrame(frame);
 })();
 </script>
 </body>

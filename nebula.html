@@ -59,15 +59,16 @@ html,body{overflow:hidden}
   <nav class="nb-bar glass" id="bar" aria-label="選擇星雲"></nav>
 </div>
 </div>
+<script src="cosmos/quality.js"></script>
 <script src="cosmos/cosmos.js"></script>
 <script src="cosmos/universe-music.js"></script>
 <script id="fs" type="x-shader/x-fragment">
 precision highp float;
 uniform vec2 uRes; uniform float uTime; uniform vec2 uPan; uniform float uZoom; uniform float uType;
-uniform vec3 uC1; uniform vec3 uC2; uniform vec3 uC3; uniform vec3 uC4; uniform float uSeed;
+uniform float uOct; uniform vec3 uC1; uniform vec3 uC2; uniform vec3 uC3; uniform vec3 uC4; uniform float uSeed;
 float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); float a=hash(i),b=hash(i+vec2(1.,0.)),c=hash(i+vec2(0.,1.)),d=hash(i+vec2(1.,1.)); return mix(mix(a,b,f.x),mix(c,d,f.x),f.y); }
-float fbm(vec2 p){ float v=0.,a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=.5; } return v; }
+float fbm(vec2 p){ float v=0.,a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ if(float(i)>=uOct) break; v+=a*noise(p); p=m*p; a*=.5; } return v; }
 mat2 rot(float a){ float c=cos(a),s=sin(a); return mat2(c,-s,s,c); }
 vec3 stars(vec2 uv){
   vec3 col=vec3(0.);
@@ -166,11 +167,11 @@ var vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
 var prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,document.getElementById('fs').textContent));gl.linkProgram(prog);gl.useProgram(prog);
 var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
 var loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-var U={};['uRes','uTime','uPan','uZoom','uType','uC1','uC2','uC3','uC4','uSeed'].forEach(function(n){U[n]=gl.getUniformLocation(prog,n);});
-var S={i:+(location.hash.slice(1))||0,zoom:1,tz:1,px:0,py:0,tpx:0,tpy:0,auto:(window.COSMOS?COSMOS.anim:true),time:0,drag:null,Q:.72,music:false};
+var U={};['uRes','uTime','uPan','uZoom','uType','uC1','uC2','uC3','uC4','uSeed','uOct'].forEach(function(n){U[n]=gl.getUniformLocation(prog,n);});
+var S={i:+(location.hash.slice(1))||0,zoom:1,tz:1,px:0,py:0,tpx:0,tpy:0,auto:(window.COSMOS?COSMOS.anim:true),time:0,drag:null,Q:QUALITY.cfg.neb,music:false};
 if(S.i<0||S.i>=NEB.length)S.i=0;
-var W,H;function resize(){var dpr=Math.min(devicePixelRatio||1,2)*S.Q;W=Math.max(2,Math.floor(stage.clientWidth*dpr));H=Math.max(2,Math.floor(stage.clientHeight*dpr));cv.width=W;cv.height=H;gl.viewport(0,0,W,H);}
-addEventListener('resize',resize);resize();
+var W,H;function resize(){var dpr=QUALITY.dpr()*S.Q;W=Math.max(2,Math.floor(stage.clientWidth*dpr));H=Math.max(2,Math.floor(stage.clientHeight*dpr));cv.width=W;cv.height=H;gl.viewport(0,0,W,H);}
+addEventListener('resize',resize);resize();QUALITY.onChange(function(){S.Q=QUALITY.cfg.neb;resize();});QUALITY.mount(document.querySelector('.nb-tools'),{desc:false});
 // UI
 var bar=document.getElementById('bar');NEB.forEach(function(n,i){var b=document.createElement('button');b.className='nb-chip';b.textContent=n.n.split('・')[0];b.onclick=function(){pick(i);};bar.appendChild(b);});
 function pick(i){S.i=i;S.zoom=S.tz=1;S.px=S.py=S.tpx=S.tpy=0;var n=NEB[i];
@@ -192,7 +193,7 @@ var mb=document.getElementById('tMusic');mb.onclick=function(){if(!UMUSIC.isOn()
 addEventListener('keydown',function(e){if(e.key==='ArrowRight')pick((S.i+1)%NEB.length);if(e.key==='ArrowLeft')pick((S.i+NEB.length-1)%NEB.length);});
 var t0=performance.now(),last=t0;
 function render(now){var n=NEB[S.i],t=S.time;
-  gl.uniform2f(U.uRes,W,H);gl.uniform1f(U.uTime,t);gl.uniform2f(U.uPan,S.px,S.py);gl.uniform1f(U.uZoom,S.zoom);gl.uniform1f(U.uType,S.i);gl.uniform1f(U.uSeed,n.seed);
+  gl.uniform2f(U.uRes,W,H);gl.uniform1f(U.uTime,t);gl.uniform2f(U.uPan,S.px,S.py);gl.uniform1f(U.uZoom,S.zoom);gl.uniform1f(U.uType,S.i);gl.uniform1f(U.uSeed,n.seed);gl.uniform1f(U.uOct,QUALITY.cfg.octave);
   gl.uniform3fv(U.uC1,n.c[0]);gl.uniform3fv(U.uC2,n.c[1]);gl.uniform3fv(U.uC3,n.c[2]);gl.uniform3fv(U.uC4,n.c[3]);gl.drawArrays(gl.TRIANGLES,0,3);}
 function loop(now){var dt=Math.min(.05,(now-last)/1000);last=now;if(COSMOS.anim)S.time+=dt;
   S.zoom+=(S.tz-S.zoom)*Math.min(1,dt*6);S.px+=(S.tpx-S.px)*Math.min(1,dt*8);S.py+=(S.tpy-S.py)*Math.min(1,dt*8);
